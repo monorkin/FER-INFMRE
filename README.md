@@ -74,6 +74,7 @@ For the above topology setup:
     - Congestion control:
       + Sender agent: Vegas
       + Receiver agent: TCP Sink with one ACK per packet
+    - Start-end time: 2-4.5s
 
 Links:
 
