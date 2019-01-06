@@ -12,6 +12,8 @@ create a simulation using the
 
 ### Algorithm
 
+[Original text](./algorithm_assignment_text.pdf)
+
 Our assignment is to implement the **Bellman-Ford shortest path algorithm**.
 
 The assignment is as follows:
@@ -45,6 +47,8 @@ The assignment is as follows:
 
 ### Simulation
 
+[Original text](./simulation_assignment_text.pdf)
+
 ![Assigned graph](./assigned_graph.png)
 
 For the above topology setup:
@@ -70,3 +74,72 @@ For the above topology setup:
     - Congestion control:
       + Sender agent: Vegas
       + Receiver agent: TCP Sink with one ACK per packet
+
+Links:
+
+* l1
+  - Direction: two-sided
+  - Bandwidth: 1Mb
+  - Delay: 10ms
+  - Queue-type: Drop Tail
+* l2
+  - Direction: two-sided
+  - Bandwidth: 1Mb
+  - Delay: 5ms
+  - Queue-type: Drop Tail
+* l3
+  - Direction: two-sided
+  - Bandwidth: 0.5Mb
+  - Delay: 10ms
+  - Queue-type: Drop Tail
+* l4
+  - Direction: two-sided
+  - Bandwidth: 1.5Mb
+  - Delay: 10ms
+  - Queue-type: Drop Tail
+* l5
+  - Direction: two-sided
+  - Bandwidth: 0.5Mb
+  - Delay: 10ms
+  - Queue-type: Drop Tail
+* l6
+  - Direction: two-sided
+  - Bandwidth: 1Mb
+  - Delay: 10ms
+  - Queue-type: Drop Tail
+* l7
+  - Direction: two-sided
+  - Bandwidth: 1Mb
+  - Delay: 5ms
+  - Queue-type: Drop Tail
+
+On line (`n3`-`n4`) add a loss module that rejects packets with a 1% probability
+
+**Simulation duration:** 5s
+
+Collective questions:
+
+1. Draw the flow of data over the duration of the simulation for all flows using
+  `xgraph` commands and the files of your simulation.
+  Example: `exec xgraph out).tr out1.tr -geometry 800x400 &`
+2. Identify the moments at which throughput changes occur on the graph and
+  explain them.
+3. Make a screenshot from the `NAM` program and mark which are the source nodes,
+  and which are the destination nodes of each flow. Also mark with which color
+  the flow is drawn.
+
+Individual questions:
+
+1. What happens with FTP traffic throughput during and after the CBR traffic
+  flow?
+2. Draw the size of the TCP congestion window using `xgraph` and the files of
+  your simulation. Comment the graph.
+3. Vary the TCP agents and draw throughput graphs. Which TCP version has the
+  maximum utilization of the available resources? Explain why.
+  Supported agents:
+    * Tahoe
+    * Reno
+    * NewReno
+    * Sack1 - TCP with selective repeat (RFC2018)
+    * Vegas
+    * Fack - Reno with "forward acknowledgment"
