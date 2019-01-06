@@ -55,13 +55,13 @@ For the above topology setup:
 
 1. CBR traffic flow over UDP between nodes `n0` and `n5`
   * CBR traffic model:
-    - packet size: 1500 bytes
-    - transmission speed: 512kb/s
-    - star-end time: 1-3.5s
+    - Packet size: 1500 bytes
+    - Transmission speed: 512kb/s
+    - Star-end time: 1-3.5s
 2. On/Off traffic flow (distributed by Paret's distribution) over a UDP
   connection between nodes `n1` and `n6`
   * On/Off traffic model:
-    - packet size: 1000 bytes
+    - Packet size: 1000 bytes
     - On period: 500ms
     - Off period: 50ms
     - Transmission speed while On: 500kb/s
@@ -71,10 +71,10 @@ For the above topology setup:
   * TCP
     - Max congestion window size: 5 packets
     - Packet size: 1500 bytes
+    - Start-end time: 2-4.5s
     - Congestion control:
       + Sender agent: Vegas
       + Receiver agent: TCP Sink with one ACK per packet
-    - Start-end time: 2-4.5s
 
 Links:
 
