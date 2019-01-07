@@ -102,7 +102,7 @@ $ns attach-agent $n5 $sink1
 $ns connect $udp1 $sink1
 
 # Send CBR packets over the beforehand created UDP connection
-set cbr1 [new Application/Traffic/CBR]
+set cbr [new Application/Traffic/CBR]
 $cbr attach-agent $udp1
 # Set the transmission speed/rate
 $cbr set rate_ 512k
