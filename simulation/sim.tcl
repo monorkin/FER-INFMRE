@@ -1,9 +1,5 @@
 # Authors
 # Stanko Krtalic Rusendic - 0036463148
-# Tamara Milisa - 0036485913
-# Petar Podbreznicki - 0036485789
-# Marin Maskarin - 0036488957
-# Filip Zivkovic - 0036495836
 # Fran Kosec - 0036465847
 
 ###############
@@ -23,13 +19,15 @@ $ns color 3 Green
 # Instruct the simulator to record each step of the simulation
 # This is, again, used for the `NAM` part of the assignment
 # `NAM` uses the generated `out.nam` file to generate it's graph
-# We will use the `nf` variable to stor the output file
+# We will use the `nf` variable to store the output file
 set nf [open out.nam w]
 $ns namtrace-all $nf
 
-set fileCbr [open cbr.tr w]
-set fileOO [open onoff.tr w]
-set fileTcp [open tcp.tr w]
+# Set filenames for output
+set cbrFile [open cbr.tr w]
+set paretoFile [open pareto.tr w]
+set tcpFile [open tcp.tr w]
+set cwndFile [open cwnd.tr w]
 
 #########
 # PROCS #
@@ -40,42 +38,47 @@ set fileTcp [open tcp.tr w]
 # it.
 proc finish {} {
   # Use the `ns` and `nf` global variables
-  global ns nf fileCbr fileOO fileTcp
+  global ns nf cbrFile paretoFile tcpFile cwndFile
   # Writes out the steps of the simulation to `out.nam`
   $ns flush-trace
   # Close the NAM trace file
   close $nf
-  close $fileCbr
-  close $fileOO
-  close $fileTcp
+  close $cbrFile
+  close $paretoFile
+  close $tcpFile
+  close $cwndFile
   # Execute NAM on the trace file
   exec nam out.nam &
-  exec xgraph cbr.tr onoff.tr tcp.tr -geometry 800x400 &
+  # Execute plotting
+  exec xgraph cbr.tr tcp.tr pareto.tr -geometry 800x400 -bg white -zg black -x time -y speed  &
+  exec xgraph cwnd.tr -geometry 800x400 -bg white -zg black &
   exit 0
 }
 
-
+# Procedure for recording the simulation results
 proc record {} {
-	global ns fileCbr sink1 fileOO sink2 fileTcp sink3
-
+	global ns cbrFile paretoFile tcpFile cwndFile sink1 sink2 sink3 tcp1
 	set time 0.1
 	set now [$ns now]
 
-	set cbrBytes [$sink1 set bytes_]
-	puts $fileCbr "$now [expr $cbrBytes/$time*8/1000000]"
-	$sink1 set bytes_ 0
+  set cbrBytes [$sink1 set bytes_]
+  puts $cbrFile "$now [expr $cbrBytes/$time*8/1000000]"
+  $sink1 set bytes_ 0
 
-	set ooBytes [$sink2 set bytes_]
-	puts $fileOO "$now [expr $ooBytes/$time*8/1000000]"
-	$sink2 set bytes_ 0
+  set paretoBytes [$sink2 set bytes_]
+  puts $paretoFile "$now [expr $paretoBytes/$time*8/1000000]"
+  $sink2 set bytes_ 0
 
 	set tcpBytes [$sink3 set bytes_]
-	puts $fileTcp "$now [expr $tcpBytes/$time*8/1000000]"
+	puts $tcpFile "$now [expr $tcpBytes/$time*8/1000000]"
 	$sink3 set bytes_ 0
 
+  set cwnd [$tcp1 set cwnd_]
+  puts $cwndFile "$now $cwnd"
+
+	# Call the record function every $time period
 	$ns at [expr $now+$time] "record"
 }
-
 
 #########
 # NODES #
@@ -97,7 +100,7 @@ set n7 [$ns node]
 #########
 
 # Define all links
-$ns duplex-link $n0 $n3 2Mb 10ms DropTail
+$ns duplex-link $n0 $n3 1Mb 10ms DropTail
 $ns duplex-link $n1 $n3 1Mb 5ms DropTail
 $ns duplex-link $n2 $n3 0.5Mb 10ms DropTail
 $ns duplex-link $n3 $n4 1.5Mb 10ms DropTail
@@ -191,6 +194,10 @@ set tcp1 [new Agent/TCP/Vegas]
 $tcp1 set class_ 3
 # Set the flow ID
 $tcp1 set fid_ 3
+# Set the max size of the congestion window
+$tcp1 set maxcwnd_ 5
+# Set the packet size
+$tcp1 set packetSize_ 1500
 # Assign the TCP Vegas agent to node 2
 $ns attach-agent $n2 $tcp1
 # Set `sink3` to a new TCP Sink agent
@@ -204,10 +211,6 @@ $ns connect $tcp1 $sink3
 set ftp [new Application/FTP]
 $ftp attach-agent $tcp1
 $ftp set type_ FTP
-# Set the max size of the congestion window
-$ftp set window_ 5
-# Set the packet size
-$ftp set packet_size_ 1500
 
 
 ###############
@@ -227,8 +230,8 @@ $ns link-lossmodel $loss_module $n3 $n4
 # EVENT TIMING #
 ################
 
-$ns at 0 "record"
-# Specify the start and end time of each protocol
+# Specify the start and end time of each protocol and plotting/recording procedures
+$ns at 0.0 "record"
 $ns at 2 "$ftp start"
 $ns at 4.5 "$ftp stop"
 $ns at 1 "$cbr start"
