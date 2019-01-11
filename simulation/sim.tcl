@@ -1,5 +1,10 @@
 # Authors
 # Stanko Krtalic Rusendic - 0036463148
+# Tamara Milisa - 0036485913
+# Petar Podbreznicki - 0036485789
+# Marin Maskarin - 0036488957
+# Filip Zivkovic - 0036495836
+# Fran Kosec - 0036465847
 
 ###############
 # DEFINITIONS #
@@ -22,6 +27,9 @@ $ns color 3 Green
 set nf [open out.nam w]
 $ns namtrace-all $nf
 
+set fileCbr [open cbr.tr w]
+set fileOO [open onoff.tr w]
+set fileTcp [open tcp.tr w]
 
 #########
 # PROCS #
@@ -32,14 +40,40 @@ $ns namtrace-all $nf
 # it.
 proc finish {} {
   # Use the `ns` and `nf` global variables
-  global ns nf
+  global ns nf fileCbr fileOO fileTcp
   # Writes out the steps of the simulation to `out.nam`
   $ns flush-trace
   # Close the NAM trace file
   close $nf
+  close $fileCbr
+  close $fileOO
+  close $fileTcp
   # Execute NAM on the trace file
   exec nam out.nam &
+  exec xgraph cbr.tr onoff.tr tcp.tr -geometry 800x400 &
   exit 0
+}
+
+
+proc record {} {
+	global ns fileCbr sink1 fileOO sink2 fileTcp sink3
+
+	set time 0.1
+	set now [$ns now]
+
+	set cbrBytes [$sink1 set bytes_]
+	puts $fileCbr "$now [expr $cbrBytes/$time*8/1000000]"
+	$sink1 set bytes_ 0
+
+	set ooBytes [$sink2 set bytes_]
+	puts $fileOO "$now [expr $ooBytes/$time*8/1000000]"
+	$sink2 set bytes_ 0
+
+	set tcpBytes [$sink3 set bytes_]
+	puts $fileTcp "$now [expr $tcpBytes/$time*8/1000000]"
+	$sink3 set bytes_ 0
+
+	$ns at [expr $now+$time] "record"
 }
 
 
@@ -193,6 +227,7 @@ $ns link-lossmodel $loss_module $n3 $n4
 # EVENT TIMING #
 ################
 
+$ns at 0 "record"
 # Specify the start and end time of each protocol
 $ns at 2 "$ftp start"
 $ns at 4.5 "$ftp stop"
